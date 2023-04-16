@@ -5,13 +5,16 @@ from .models import Customer, DeliveryAgent, Order
 from .serializers import CustomerSerializer, DeliveryAgentSerializer, OrderSerializer
 
 class CustomerTests(APITestCase):
+    
     def setUp(self):
         self.customer = Customer.objects.create(name='John Doe', phone_number='1234567890', address='123 Main St')
         self.url = reverse('customer-detail', args=[self.customer.id])
+        
     def test_get_customer(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, CustomerSerializer(self.customer).data)
+        
     def test_update_customer(self):
         data = {'name': 'Jane Doe', 'phone_number':'0987654321', 'address': '456 Elm St'}
         response = self.client.put(self.url, data)
@@ -20,14 +23,18 @@ class CustomerTests(APITestCase):
         self.assertEqual(self.customer.name, 'Jane Doe')
         self.assertEqual(self.customer.phone_number, '0987654321')
         self.assertEqual(self.customer.address, '456 Elm St')
+        
     def test_delete_customer(self):
         response = self.client.delete(self.url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Customer.objects.filter(id=self.customer.id).exists())
+        
 class DeliveryAgentTests(APITestCase):
+
     def setUp(self):
         self.delivery_agent = DeliveryAgent.objects.create(name='John Smith', email='john@example.com', phone_number='1234567890', availability=True, address='123 Main St')
         self.url = reverse('delivery-agent-detail', args=[self.delivery_agent.id])
+        
     def test_get_delivery_agent(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -55,21 +62,22 @@ class OrderTests(APITestCase):
         self.delivery_agent = DeliveryAgent.objects.create(name='John Smith', email='john@example.com', phone_number='1234567890', availability=True, address='123 Main St')
         self.order = Order.objects.create(customer=self.customer, delivery_address='456 Elm St', order_details='Test Order Details')
         self.url = reverse('order-detail', args=[self.order.id])
+
     def test_get_order(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, OrderSerializer(self.order).data)
 
-def test_update_order(self):
-    data = {'customer': self.customer.id, 'delivery_address': '789 Oak St', 'order_details': 'Updated Order Details'}
-    response = self.client.put(self.url, data)
-    self.assertEqual(response.status_code, status.HTTP_200_OK)
-    self.order.refresh_from_db()
-    self.assertEqual(self.order.customer, self.customer)
-    self.assertEqual(self.order.delivery_address, '789 Oak St')
-    self.assertEqual(self.order.order_details, 'Updated Order Details')
+    def test_update_order(self):
+        data = {'customer': self.customer.id, 'delivery_address': '789 Oak St', 'order_details': 'Updated Order Details'}
+        response = self.client.put(self.url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.customer, self.customer)
+        self.assertEqual(self.order.delivery_address, '789 Oak St')
+        self.assertEqual(self.order.order_details, 'Updated Order Details')
 
-def test_delete_order(self):
-    response = self.client.delete(self.url)
-    self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-    self.assertFalse(Order.objects.filter(id=self.order.id).exists())
+    def test_delete_order(self):
+        response = self.client.delete(self.url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Order.objects.filter(id=self.order.id).exists())
